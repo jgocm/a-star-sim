@@ -3,11 +3,13 @@ from astar import AStar
 import cv2
 
 if __name__ == "__main__":
-    #path_to_map = 'maps/map3.json'
     map = GridMap(cols=40,
                   rows=10,
                   cell_size=20)
     map.make_random_scenario()
+    
+    #path_to_map = 'maps/map4.json'
+    #map = GridMap.load_from_json(path_to_map)
     
     astar = AStar(map.grid_data, map.start, map.goal)
     success = False
@@ -24,10 +26,20 @@ if __name__ == "__main__":
     
     map.show(0)
     if success:
-        path = astar.reconstruct_path(current_pos)
-        for point in reversed(path):
+        checkpoints = list(reversed(astar.reconstruct_path(current_pos)))
+        path = [map.get_cell_center(x, y) for x, y in checkpoints]
+        for center_px, point in zip(path, checkpoints):
+            # testing drawings
             map.add_path_point(point)
-            map.show(0)
+            img = map.render()
+            cv2.drawMarker(img, center_px, (0, 0, 0), markerType=cv2.MARKER_CROSS)
+            cv2.imshow("Grid Map", img)
+            cv2.waitKey(0)
+            
+            
+            #map.show(0)
+            
+        
     
     cv2.destroyAllWindows()
     
