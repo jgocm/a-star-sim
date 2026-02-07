@@ -67,6 +67,8 @@ class AStar:
         
     def step(self):
         open_set_array = np.array(self.open_set)
+        if len(open_set_array) == 0:
+            return False, None
         current_f_values = self.f_scores[open_set_array[:, 0], open_set_array[:, 1]]
         best_idx = np.argmin(current_f_values)
         current_pos = self.open_set[best_idx]
