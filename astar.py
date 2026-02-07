@@ -64,7 +64,7 @@ class AStar:
             current_pos = tuple(previous_pos)
             path.append(current_pos)
             
-        return path
+        return list(reversed(path))
         
     def step(self):
         open_set_array = np.array(self.open_set)
