@@ -31,7 +31,8 @@ class AStar:
     def get_valid_neighbors(self, p):
         x, y = p
         # Generate potential 4-connectivity neighbors
-        candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
+        candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1),
+                      (x-1, y-1), (x+1, y+1), (x+1, y-1), (x-1, y+1)]
         
         # Filter using a list comprehension and convert back to a list or array
         valid_neighbors = [
