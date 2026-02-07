@@ -78,20 +78,17 @@ class AStar:
         self.closed_set[tuple(current_pos)] = True
         
         for neighbor in self.get_valid_neighbors(current_pos):
-            try:
-                if self.closed_set[neighbor]:
-                    continue
+            if self.closed_set[neighbor]:
+                continue
+            
+            g_score = self.g_scores[current_pos] + self.g(neighbor, current_pos)
+            if g_score < self.g_scores[neighbor]:
+                self.parents[neighbor] = current_pos
+                self.g_scores[neighbor] = g_score
+                self.f_scores[neighbor] = g_score + self.h_scores[neighbor]
                 
-                g_score = self.g_scores[current_pos] + self.g(neighbor, current_pos)
-                if g_score < self.g_scores[neighbor]:
-                    self.parents[neighbor] = current_pos
-                    self.g_scores[neighbor] = g_score
-                    self.f_scores[neighbor] = g_score + self.h_scores[neighbor]
-                    
-                    if neighbor not in self.open_set:
-                        self.open_set.append(neighbor)
-            except:
-                breakpoint()
-        
+                if neighbor not in self.open_set:
+                    self.open_set.append(neighbor)
+
         return False, current_pos
     
