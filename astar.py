@@ -95,3 +95,22 @@ class AStar:
 
         return False, current_pos
     
+    def get_poses_from_path(self, path = []):
+        pts = np.array(path)
+        
+        # Calculate differences between consecutive points: P[i+1] - P[i]
+        # diffs[i] = [x_i+1 - x_i, y_i+1 - y_i]
+        diffs = np.diff(pts, axis=0)
+        
+        # Calculate angles using vectorized arctan2(dy, dx)
+        thetas = np.arctan2(diffs[:, 1], diffs[:, 0])
+        
+        # Since diffs has N-1 elements, we append the last theta 
+        # to maintain the same array length as the input
+        thetas = np.append(thetas, thetas[-1])
+        
+        # Concatenate the original (x, y) with the new theta column
+        # pts is (N, 2), thetas is (N,), we need to reshape thetas to (N, 1)
+        result = np.column_stack((pts, thetas))
+        
+        return list(result)
