@@ -10,7 +10,7 @@ class AStar:
         self.height, self.width = self.map.shape
         
         self.g_scores = np.full((self.height, self.width), np.inf)
-        self.g_scores[start] = 0
+        self.g_scores[self.start] = 0
         
         y_coords, x_coords = np.indices((self.height, self.width))
         self.h_scores = np.abs(y_coords - goal[0]) + np.abs(x_coords - goal[1])
@@ -67,6 +67,7 @@ class AStar:
         
         self.open_set.pop(best_idx)
         self.closed_set[tuple(current_pos)] = True
+        
         
         for neighbor in self.get_valid_neighbors(current_pos):
             if self.closed_set[neighbor]:
