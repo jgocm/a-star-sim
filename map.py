@@ -21,6 +21,7 @@ class GridMap:
         self.circles = []  # List of tuples: (col, row, radius)
         self.path = []
         self.search = []
+        self.poses = []
 
     def add_start(self, start_column, start_row) -> bool:        
         if start_column > self.cols or start_row > self.rows:
@@ -82,6 +83,11 @@ class GridMap:
         self.search.append(np.array([point_column, point_row]))
         self.grid_data[point_row, point_column] = CellType.SEARCH
         return True
+    
+    def add_pose(self, pose) -> bool:
+        self.poses.append(pose)     
+        return True   
+        
 
     def add_circular_obstacle(self, center_col, center_row, radius_cells) -> bool:
         """Adds obstacle metadata to the list and updates the logic grid."""
@@ -195,6 +201,21 @@ class GridMap:
             if cell_type in color_map:
                 self._draw_cell_rect(canvas, c, r, color_map[cell_type])
 
+    def _draw_poses(self, canvas) -> bool:
+        size = self.cell_size // 4
+        for pose in self.poses:
+            x, y, theta = pose
+            local_marker = np.array([[-size, -size], 
+                                    [size, 0], 
+                                    [-size, size]])
+            cos_t = np.cos(theta)
+            sin_t = np.sin(theta)
+            R = np.array([[cos_t, -sin_t],
+                        [sin_t,  cos_t]])
+            transformed = (local_marker @ R.T) + np.array([x, y])
+            pts = transformed.astype(np.int32)
+            cv2.polylines(canvas, [pts], isClosed=False, color=(0, 0, 0), thickness=2, lineType=cv2.LINE_AA)
+
     def render(self):
         """The single source of truth for drawing the current state."""
         # Create blank canvas
@@ -214,7 +235,9 @@ class GridMap:
             cv2.line(canvas, (x, 0), (x, self.height), (200, 200, 200), self.line_thickness)
         for y in range(0, self.height + 1, self.cell_size):
             cv2.line(canvas, (0, y), (self.width, y), (200, 200, 200), self.line_thickness)
-            
+        
+        self._draw_poses(canvas)
+        
         return canvas
 
     def show(self, wait_ms = 0):

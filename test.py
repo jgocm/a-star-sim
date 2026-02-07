@@ -26,20 +26,15 @@ if __name__ == "__main__":
     
     map.show(0)
     if success:
-        checkpoints = list(reversed(astar.reconstruct_path(current_pos)))
+        checkpoints = astar.reconstruct_path(current_pos)
         path = [map.get_cell_center(x, y) for x, y in checkpoints]
-        for center_px, point in zip(path, checkpoints):
-            # testing drawings
+        poses = astar.get_poses_from_path(path)
+        for pose, point in zip(poses, checkpoints):
+            center_px = pose[0], pose[1]
+            theta = pose[2]
             map.add_path_point(point)
-            img = map.render()
-            cv2.drawMarker(img, center_px, (0, 0, 0), markerType=cv2.MARKER_CROSS)
-            cv2.imshow("Grid Map", img)
-            cv2.waitKey(0)
-            
-            
-            #map.show(0)
-            
-        
+            map.add_pose(pose)
+            map.show(0)          
     
     cv2.destroyAllWindows()
     
