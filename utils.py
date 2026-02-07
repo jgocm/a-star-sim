@@ -1,5 +1,12 @@
 import numpy as np
 import cv2
+from enum import Enum
+class CellType(Enum):
+    FREE = 0
+    OBSTACLE = 1
+    START = 2
+    GOAL = 3
+    PATH = 4
 
 def manhattan_distance(p1, p2):
     return np.abs(p1[0] - p2[0]) + np.abs(p1[1] - p2[1])

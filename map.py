@@ -1,16 +1,9 @@
 import cv2
 import numpy as np
 import random
-from enum import Enum
 import json
 from pathlib import Path
-
-class CellType(Enum):
-    FREE = 0
-    OBSTACLE = 1
-    START = 2
-    GOAL = 3
-
+from utils import CellType
 class GridMap:
     def __init__(self, cols, rows, cell_size, line_thickness=1):
         self.cols = cols
@@ -26,6 +19,7 @@ class GridMap:
         self.start = None
         self.goal = None
         self.circles = []  # List of tuples: (col, row, radius)
+        self.path = []
 
     def add_start(self, start_column, start_row) -> bool:        
         if start_column > self.cols or start_row > self.rows:
@@ -65,6 +59,17 @@ class GridMap:
         success = self.add_start(start_column, start_row)
         success = success and self.add_goal(goal_column, goal_row)
         return success
+    
+    def add_path_point(self, point_coords) -> bool:
+        point_column, point_row = point_coords
+        if self.grid_data[point_row, point_column] == CellType.GOAL:
+            return False
+        if self.grid_data[point_row, point_column] == CellType.START:
+            return False
+        
+        self.path.append(np.array([point_column, point_row]))
+        self.grid_data[point_row, point_column] = CellType.PATH
+        return True
 
     def add_circular_obstacle(self, center_col, center_row, radius_cells) -> bool:
         """Adds obstacle metadata to the list and updates the logic grid."""
@@ -164,7 +169,8 @@ class GridMap:
         color_map = {
             CellType.OBSTACLE: (0, 0, 0),
             CellType.START: (0, 255, 0),
-            CellType.GOAL: (0, 0, 255)
+            CellType.GOAL: (0, 0, 255),
+            CellType.PATH: (0, 165, 255)
         }
 
         # np.ndenumerate returns ((row, col), value)
@@ -194,10 +200,10 @@ class GridMap:
             
         return canvas
 
-    def show(self):
+    def show(self, wait_ms = 0):
         img = self.render()
         cv2.imshow("Grid Map", img)
-        key = cv2.waitKey(0)
+        key = cv2.waitKey(wait_ms)
         if key == ord('d'):
             breakpoint()
         if key == ord('q'):
