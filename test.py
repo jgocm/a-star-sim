@@ -1,14 +1,11 @@
 from map import GridMap
 from astar import AStar
 import utils
+import cv2
 
 if __name__ == "__main__":
-    path_to_map = 'maps/map2.json'
+    path_to_map = 'maps/map3.json'
     map = GridMap.load_from_json(path_to_map)
-    
-    print(f'start: {map.start}')
-    print(f'goal: {map.goal}')
-    print(f'distance: {utils.dist(map.start, map.goal)}')
     
     astar = AStar(map.grid_data, map.start, map.goal)
     finished = False
@@ -17,7 +14,14 @@ if __name__ == "__main__":
         finished, current_pos = astar.step()
         i += 1
         print(i, finished, current_pos)
-        map.add_path_point(current_pos)
+        map.add_search_point(current_pos)
         map.show(1)
-        # TODO: debug x, y coordinates, there might be something inverted
+    
+    path = astar.reconstruct_path(current_pos)
+    for point in reversed(path):
+        map.add_path_point(point)
+        map.show(0)
+    
+    cv2.destroyAllWindows()
+    
         

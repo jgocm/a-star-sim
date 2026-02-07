@@ -7,6 +7,7 @@ class CellType(Enum):
     START = 2
     GOAL = 3
     PATH = 4
+    SEARCH = 5
 
 def manhattan_distance(p1, p2):
     return np.abs(p1[0] - p2[0]) + np.abs(p1[1] - p2[1])

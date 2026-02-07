@@ -20,6 +20,7 @@ class GridMap:
         self.goal = None
         self.circles = []  # List of tuples: (col, row, radius)
         self.path = []
+        self.search = []
 
     def add_start(self, start_column, start_row) -> bool:        
         if start_column > self.cols or start_row > self.rows:
@@ -32,7 +33,7 @@ class GridMap:
             return False
                 
         # Update grid data matrix
-        self.start = np.array([start_column, start_row])
+        self.start = (start_column, start_row)
         self.grid_data[start_row, start_column] = CellType.START
         return True
 
@@ -47,7 +48,7 @@ class GridMap:
             return False
                 
         # Update grid data matrix
-        self.goal = np.array([goal_column, goal_row])
+        self.goal = (goal_column, goal_row)
         self.grid_data[goal_row, goal_column] = CellType.GOAL
         return True
 
@@ -69,6 +70,17 @@ class GridMap:
         
         self.path.append(np.array([point_column, point_row]))
         self.grid_data[point_row, point_column] = CellType.PATH
+        return True
+
+    def add_search_point(self, point_coords) -> bool:
+        point_column, point_row = point_coords
+        if self.grid_data[point_row, point_column] == CellType.GOAL:
+            return False
+        if self.grid_data[point_row, point_column] == CellType.START:
+            return False
+        
+        self.search.append(np.array([point_column, point_row]))
+        self.grid_data[point_row, point_column] = CellType.SEARCH
         return True
 
     def add_circular_obstacle(self, center_col, center_row, radius_cells) -> bool:
@@ -152,7 +164,11 @@ class GridMap:
             r_goal = random.randint(0, self.rows - 1)
             if self.add_goal(c_goal, r_goal):
                 break
-                            
+    
+    def make_random_scenario(self):
+        self.make_random_start_and_goal()
+        self.make_random_circles(10, 1, 4)        
+    
     def _get_cell_center(self, col, row):
         x = (col * self.cell_size) + (self.cell_size // 2)
         y = (row * self.cell_size) + (self.cell_size // 2)
@@ -170,7 +186,8 @@ class GridMap:
             CellType.OBSTACLE: (0, 0, 0),
             CellType.START: (0, 255, 0),
             CellType.GOAL: (0, 0, 255),
-            CellType.PATH: (0, 165, 255)
+            CellType.SEARCH: (0, 200, 255),
+            CellType.PATH: (0, 130, 255)
         }
 
         # np.ndenumerate returns ((row, col), value)
