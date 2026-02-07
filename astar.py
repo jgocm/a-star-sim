@@ -9,18 +9,18 @@ class AStar:
         self.map = map
         self.height, self.width = self.map.shape
         
-        self.g_scores = np.full((self.height, self.width), np.inf)
+        self.g_scores = np.full((self.width, self.height), np.inf)
         self.g_scores[self.start] = 0
         
-        y_coords, x_coords = np.indices((self.height, self.width))
+        y_coords, x_coords = np.indices((self.width, self.height))
         self.h_scores = np.abs(y_coords - goal[0]) + np.abs(x_coords - goal[1])
         
         self.f_scores = self.g_scores + self.h_scores        
         
-        self.parents = np.full((self.height, self.width, 2), -1, dtype=int)
+        self.parents = np.full((self.width, self.height, 2), -1, dtype=int)
 
         self.open_set = [self.start]
-        self.closed_set = np.zeros((self.height, self.width), dtype=bool)
+        self.closed_set = np.zeros((self.width, self.height), dtype=bool)
 
     def h(self, p):
         return dist(p, self.goal, 'manhattam')
