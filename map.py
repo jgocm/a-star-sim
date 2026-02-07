@@ -169,7 +169,7 @@ class GridMap:
         self.make_random_start_and_goal()
         self.make_random_circles(10, 1, 4)        
     
-    def _get_cell_center(self, col, row):
+    def get_cell_center(self, col, row):
         x = (col * self.cell_size) + (self.cell_size // 2)
         y = (row * self.cell_size) + (self.cell_size // 2)
         return (x, y)
@@ -205,7 +205,7 @@ class GridMap:
         
         # Draw Obstacles
         for c, r, rad in self.circles:
-            center_px = self._get_cell_center(c, r)
+            center_px = self.get_cell_center(c, r)
             radius_px = int(rad * self.cell_size)
             cv2.circle(canvas, center_px, radius_px, (80, 80, 80), -1)
 
