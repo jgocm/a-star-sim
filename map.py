@@ -226,7 +226,7 @@ class GridMap:
     def _draw_trajectory(self, img):
         pts = np.array(self.trajectory).astype(np.int32)
         cv2.polylines(img, [pts], isClosed=False, color=(0, 0, 0), thickness=1, lineType=cv2.LINE_AA)        
-            
+        
     def render(self):
         """The single source of truth for drawing the current state."""
 
@@ -245,13 +245,13 @@ class GridMap:
         for y in range(0, self.height + 1, self.cell_size):
             cv2.line(self.canvas, (0, y), (self.width, y), (200, 200, 200), self.line_thickness)
         
-        #for pose in self.poses:
-        #    self._draw_pose(self.canvas, pose, size = self.cell_size // 4)
-        if self.poses:
+        if self.trajectory:
+            self._draw_trajectory(self.canvas)
             self._draw_pose(self.canvas, self.poses[-1], self.cell_size // 4)
+        else:    
+            for pose in self.poses:
+                self._draw_pose(self.canvas, pose, size = self.cell_size // 4)
         
-        self._draw_trajectory(self.canvas)
-                
         return self.canvas
 
     def reset_poses(self):
@@ -266,6 +266,8 @@ class GridMap:
         if key == ord('q'):
             cv2.destroyAllWindows()
             quit()
+        
+        return img
      
     def save_to_json(self, file_path: str):
         """Saves the map configuration and state to a JSON file."""
