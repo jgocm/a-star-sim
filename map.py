@@ -233,18 +233,18 @@ class GridMap:
         # Draw cells
         self._draw_grid_cells(self.canvas)
         
-        # Draw Obstacles
-        for c, r, rad in self.circles:
-            center_px = self.get_cell_center(c, r)
-            radius_px = int(rad * self.cell_size)
-            cv2.circle(self.canvas, center_px, radius_px, (80, 80, 80), -1)
-
         # Draw Grid Lines
         for x in range(0, self.width + 1, self.cell_size):
             cv2.line(self.canvas, (x, 0), (x, self.height), (200, 200, 200), self.line_thickness)
         for y in range(0, self.height + 1, self.cell_size):
             cv2.line(self.canvas, (0, y), (self.width, y), (200, 200, 200), self.line_thickness)
         
+        # Draw Obstacles
+        for c, r, rad in self.circles:
+            center_px = self.get_cell_center(c, r)
+            radius_px = int(rad * self.cell_size)
+            cv2.circle(self.canvas, center_px, radius_px, (80, 80, 80), -1)
+            
         if self.trajectory:
             self._draw_trajectory(self.canvas)
             self._draw_pose(self.canvas, self.poses[-1], self.cell_size // 4)
