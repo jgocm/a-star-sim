@@ -19,9 +19,10 @@ class GridMap:
         self.start = None
         self.goal = None
         self.circles = []  # List of tuples: (col, row, radius)
-        self.path = []
         self.search = []
+        self.path = []
         self.poses = []
+        self.trajectory = []
 
     def add_start(self, start_column, start_row) -> bool:        
         if start_column > self.cols or start_row > self.rows:
@@ -87,8 +88,11 @@ class GridMap:
     def add_pose(self, pose) -> bool:
         self.poses.append(pose)     
         return True   
+    
+    def add_trajectory_point(self, point) -> bool:
+        self.trajectory.append(point)
+        return True
         
-
     def add_circular_obstacle(self, center_col, center_row, radius_cells) -> bool:
         """Adds obstacle metadata to the list and updates the logic grid."""
         if self.has_circle_overlap(center_col, center_row, radius_cells):
@@ -201,7 +205,7 @@ class GridMap:
             if cell_type in color_map:
                 self._draw_cell_rect(canvas, c, r, color_map[cell_type])
 
-    def _draw_poses(self, canvas) -> bool:
+    def _draw_poses(self, canvas):
         size = self.cell_size // 4
         for pose in self.poses:
             x, y, theta = pose
@@ -214,11 +218,16 @@ class GridMap:
                         [sin_t,  cos_t]])
             transformed = (local_marker @ R.T) + np.array([x, y])
             pts = transformed.astype(np.int32)
-            cv2.polylines(canvas, [pts], isClosed=False, color=(0, 0, 0), thickness=2, lineType=cv2.LINE_AA)
-
+            cv2.polylines(canvas, [pts], isClosed=False, color=(0, 0, 0), thickness=2, lineType=cv2.LINE_AA)        
+    
+    def _draw_trajectory(self, canvas):
+        pts = np.array(self.trajectory).astype(np.int32)
+        cv2.polylines(canvas, [pts], isClosed=False, color=(0, 0, 0), thickness=1, lineType=cv2.LINE_AA)        
+            
     def render(self):
         """The single source of truth for drawing the current state."""
         # Create blank canvas
+        # TODO: turn canvas into class attribute -> only create it once
         canvas = np.ones((self.height, self.width, 3), dtype=np.uint8) * 255
 
         # Draw cells
@@ -238,7 +247,12 @@ class GridMap:
         
         self._draw_poses(canvas)
         
+        self._draw_trajectory(canvas)
+                
         return canvas
+
+    def reset_poses(self):
+        self.poses = []
 
     def show(self, wait_ms = 0):
         img = self.render()
