@@ -114,3 +114,15 @@ class AStar:
         result = np.column_stack((pts, thetas))
         
         return list(result)
+    
+    def find_path(self):
+        success = False
+        while not success:
+            success, current_pos = self.step()
+            if current_pos == None:
+                print('There is no path to the goal')
+                return success, None
+        
+        return success, self.reconstruct_path(current_pos)
+        
+        
