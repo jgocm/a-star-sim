@@ -26,19 +26,19 @@ def smooth_path(astar_path, num_samples=100):
     return list(zip(x_int, y_int))
 
 if __name__ == "__main__":
-    
     # Generate random map
-    map = GridMap(cols=40,
-                  rows=10,
+    map = GridMap(cols=80,
+                  rows=20,
                   cell_size=20)
-    map.make_random_scenario()
+    map.make_random_scenario(20)
     
     # Load map from previously saved json
-    #path_to_map = 'maps/map4.json'
-    #map = GridMap.load_from_json(path_to_map)
+    path_to_map = 'maps/map5.json'
+    map = GridMap.load_from_json(path_to_map)
     
     # Instantiate A*
     astar = AStar(map.grid_data, map.start, map.goal)
+    map.show(0)
     
     # Run A* search step-by-step and show on screen
     success = False
@@ -52,7 +52,7 @@ if __name__ == "__main__":
         map.show(1)
     
     # Show result after search
-    map.show(1)
+    map.show(0)
     
     if not success:
         cv2.destroyAllWindows()
@@ -76,17 +76,12 @@ if __name__ == "__main__":
     map.reset_poses()
     new_path = smooth_path(path)
     new_poses = astar.get_poses_from_path(new_path)
-    step = 10
-    last_pose_idx = len(new_poses) - 1
     for i, (pose, point) in enumerate(zip(new_poses, new_path)):
-        center_px = pose[0], pose[1]
-        theta = pose[2]
         map.add_trajectory_point(point)
-        if i % step == 0 or i == last_pose_idx:
-            map.add_pose(pose)
-        map.show(1)
+        map.add_pose(pose)
+        map.show(100)
     
-    # Show new path
+    # Show smoothed path
     map.show(0)
     
     cv2.destroyAllWindows()
