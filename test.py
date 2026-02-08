@@ -38,7 +38,7 @@ if __name__ == "__main__":
     
     # Instantiate A*
     astar = AStar(map.grid_data, map.start, map.goal)
-    map.show(0)
+    map.show(2000)
     
     # Run A* search step-by-step and show on screen
     success = False
@@ -52,7 +52,7 @@ if __name__ == "__main__":
         map.show(1)
     
     # Show result after search
-    map.show(0)
+    map.show(2000)
     
     if not success:
         cv2.destroyAllWindows()
@@ -70,7 +70,7 @@ if __name__ == "__main__":
         map.show(1)
 
     # Show path
-    map.show(0)
+    map.show(2000)
     
     # Optimize path with interpolation
     map.reset_poses()
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         map.show(100)
     
     # Show smoothed path
-    map.show(0)
+    map.show(2000)
     
     cv2.destroyAllWindows()
         
