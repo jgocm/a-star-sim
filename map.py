@@ -14,11 +14,16 @@ class GridMap:
         self.width = cols * cell_size
         self.height = rows * cell_size
         
+        # Create blank canvas
+        self.canvas = np.ones((self.height, self.width, 3), dtype=np.uint8) * 255
+        
         # --- Data Storage (The "State") ---
         self.grid_data = np.full((rows, cols), CellType.FREE, dtype=CellType)
         self.start = None
         self.goal = None
         self.circles = []  # List of tuples: (col, row, radius)
+        
+        # data from path planning
         self.search = []
         self.path = []
         self.poses = []
@@ -175,9 +180,9 @@ class GridMap:
             if self.add_goal(c_goal, r_goal):
                 break
     
-    def make_random_scenario(self):
+    def make_random_scenario(self, nr_circles: int = 10, min_radius: int = 1, max_radius: int = 4):
         self.make_random_start_and_goal()
-        self.make_random_circles(10, 1, 4)        
+        self.make_random_circles(nr_circles, min_radius, max_radius)        
     
     def get_cell_center(self, col, row):
         x = (col * self.cell_size) + (self.cell_size // 2)
@@ -189,8 +194,8 @@ class GridMap:
         p2 = ((col+1) * self.cell_size - self.line_thickness, (row+1) * self.cell_size - self.line_thickness)
         cv2.rectangle(img, p1, p2, color, -1)
 
-    def _draw_grid_cells(self, canvas):
-        """Iterates through the grid and draws non-free cells onto the canvas."""
+    def _draw_grid_cells(self, img):
+        """Iterates through the grid and draws non-free cells onto the img."""
         # Define a mapping of CellType to RGB colors
         color_map = {
             CellType.OBSTACLE: (0, 0, 0),
@@ -203,53 +208,51 @@ class GridMap:
         # np.ndenumerate returns ((row, col), value)
         for (r, c), cell_type in np.ndenumerate(self.grid_data):
             if cell_type in color_map:
-                self._draw_cell_rect(canvas, c, r, color_map[cell_type])
+                self._draw_cell_rect(img, c, r, color_map[cell_type])
 
-    def _draw_poses(self, canvas):
-        size = self.cell_size // 4
-        for pose in self.poses:
-            x, y, theta = pose
-            local_marker = np.array([[-size, -size], 
-                                    [size, 0], 
-                                    [-size, size]])
-            cos_t = np.cos(theta)
-            sin_t = np.sin(theta)
-            R = np.array([[cos_t, -sin_t],
-                        [sin_t,  cos_t]])
-            transformed = (local_marker @ R.T) + np.array([x, y])
-            pts = transformed.astype(np.int32)
-            cv2.polylines(canvas, [pts], isClosed=False, color=(0, 0, 0), thickness=2, lineType=cv2.LINE_AA)        
+    def _draw_pose(self, img, pose, size: int = 5):
+        x, y, theta = pose
+        local_marker = np.array([[-size, -size], 
+                                [size, 0], 
+                                [-size, size]])
+        cos_t = np.cos(theta)
+        sin_t = np.sin(theta)
+        R = np.array([[cos_t, -sin_t],
+                    [sin_t,  cos_t]])
+        transformed = (local_marker @ R.T) + np.array([x, y])
+        pts = transformed.astype(np.int32)
+        cv2.polylines(img, [pts], isClosed=False, color=(0, 0, 0), thickness=2, lineType=cv2.LINE_AA)        
     
-    def _draw_trajectory(self, canvas):
+    def _draw_trajectory(self, img):
         pts = np.array(self.trajectory).astype(np.int32)
-        cv2.polylines(canvas, [pts], isClosed=False, color=(0, 0, 0), thickness=1, lineType=cv2.LINE_AA)        
+        cv2.polylines(img, [pts], isClosed=False, color=(0, 0, 0), thickness=1, lineType=cv2.LINE_AA)        
             
     def render(self):
         """The single source of truth for drawing the current state."""
-        # Create blank canvas
-        # TODO: turn canvas into class attribute -> only create it once
-        canvas = np.ones((self.height, self.width, 3), dtype=np.uint8) * 255
 
         # Draw cells
-        self._draw_grid_cells(canvas)
+        self._draw_grid_cells(self.canvas)
         
         # Draw Obstacles
         for c, r, rad in self.circles:
             center_px = self.get_cell_center(c, r)
             radius_px = int(rad * self.cell_size)
-            cv2.circle(canvas, center_px, radius_px, (80, 80, 80), -1)
+            cv2.circle(self.canvas, center_px, radius_px, (80, 80, 80), -1)
 
         # Draw Grid Lines
         for x in range(0, self.width + 1, self.cell_size):
-            cv2.line(canvas, (x, 0), (x, self.height), (200, 200, 200), self.line_thickness)
+            cv2.line(self.canvas, (x, 0), (x, self.height), (200, 200, 200), self.line_thickness)
         for y in range(0, self.height + 1, self.cell_size):
-            cv2.line(canvas, (0, y), (self.width, y), (200, 200, 200), self.line_thickness)
+            cv2.line(self.canvas, (0, y), (self.width, y), (200, 200, 200), self.line_thickness)
         
-        self._draw_poses(canvas)
+        #for pose in self.poses:
+        #    self._draw_pose(self.canvas, pose, size = self.cell_size // 4)
+        if self.poses:
+            self._draw_pose(self.canvas, self.poses[-1], self.cell_size // 4)
         
-        self._draw_trajectory(canvas)
+        self._draw_trajectory(self.canvas)
                 
-        return canvas
+        return self.canvas
 
     def reset_poses(self):
         self.poses = []
