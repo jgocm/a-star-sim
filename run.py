@@ -63,8 +63,6 @@ if __name__ == "__main__":
     path = [map.get_cell_center(x, y) for x, y in checkpoints]
     poses = astar.get_poses_from_path(path)
     for pose, point in zip(poses, checkpoints):
-        center_px = pose[0], pose[1]
-        theta = pose[2]
         map.add_path_point(point)
         map.add_pose(pose)
         map.show(1)
@@ -72,11 +70,11 @@ if __name__ == "__main__":
     # Show path
     map.show(2000)
     
-    # Optimize path with interpolation
+    # Smooth path with interpolation
     map.reset_poses()
-    new_path = smooth_path(path)
-    new_poses = astar.get_poses_from_path(new_path)
-    for i, (pose, point) in enumerate(zip(new_poses, new_path)):
+    smoothed_path = smooth_path(path)
+    smoothed_poses = astar.get_poses_from_path(smoothed_path)
+    for i, (pose, point) in enumerate(zip(smoothed_poses, smoothed_path)):
         map.add_trajectory_point(point)
         map.add_pose(pose)
         map.show(100)
@@ -84,9 +82,7 @@ if __name__ == "__main__":
     # Show smoothed path
     map.show(2000)
     
-    cv2.destroyAllWindows()
-        
-    
+    cv2.destroyAllWindows()   
     
     
         
