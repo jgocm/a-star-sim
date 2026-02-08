@@ -38,7 +38,7 @@ if __name__ == "__main__":
     
     # Instantiate A*
     astar = AStar(map.grid_data, map.start, map.goal)
-    map.show(2000)
+    map.show(1000)
     
     # Run A* search step-by-step and show on screen
     success = False
@@ -52,13 +52,13 @@ if __name__ == "__main__":
         map.show(1)
     
     # Show result after search
-    map.show(2000)
+    map.show(1000)
     
     if not success:
         cv2.destroyAllWindows()
         quit()
         
-    # Reconstruct path (if found)
+    # Reconstruct path (if found)    
     checkpoints = astar.reconstruct_path(current_pos)
     path = [map.get_cell_center(x, y) for x, y in checkpoints]
     poses = astar.get_poses_from_path(path)
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         map.show(1)
 
     # Show path
-    map.show(2000)
+    map.show(1000)
     
     # Smooth path with interpolation
     map.reset_poses()
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         map.show(100)
     
     # Show smoothed path
-    map.show(2000)
+    map.show(1000)
     
     cv2.destroyAllWindows()   
     
